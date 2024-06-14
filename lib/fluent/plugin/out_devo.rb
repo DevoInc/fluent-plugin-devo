@@ -123,7 +123,7 @@ module Fluent::Plugin
     def process(tag, es)
       es.each do |time, record|
         record.each_pair do |_, v|
-          v.dup.force_encoding('utf-8') if v.is_a?(String)
+          v = v.dup.force_encoding('utf-8') if v.is_a?(String)
         end
 
         # Check if severity has been provided in record otherwise use INFO
