@@ -16,6 +16,7 @@
 
 require 'socket'
 require 'openssl'
+require 'rbconfig'
 
 module SyslogTls
   # Supports SSL connection to remote host
@@ -70,8 +71,10 @@ module SyslogTls
       begin
         sock_addr = Socket.sockaddr_in(port, address)
         tcp = Socket.new(family, sock_type, 0)
-        tcp.setsockopt(Socket::SOL_SOCKET, Socket::Constants::SO_REUSEADDR, true)
-        tcp.setsockopt(Socket::SOL_SOCKET, Socket::Constants::SO_REUSEPORT, true)
+        tcp.setsockopt(Socket::SOL_SOCKET, Socket::Constants::SO_REUSEADDR, false)
+        if !RbConfig::CONFIG['host_os'].match?(/mswin|mingw|cygwin/)
+          tcp.setsockopt(Socket::SOL_SOCKET, Socket::Constants::SO_REUSEPORT, false)
+        end
         tcp.connect_nonblock(sock_addr)
       rescue Errno::EINPROGRESS
         select_with_timeout(tcp, :connect_write)
